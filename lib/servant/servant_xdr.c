@@ -6,77 +6,34 @@
 #include "servant.h"
 
 bool_t
-xdr_filename (XDR *xdrs, filename *objp)
+xdr_chunk(xdrs, objp)
+	XDR *xdrs;
+	chunk *objp;
 {
-	register int32_t *buf;
 
-	 if (!xdr_string (xdrs, objp, FILENAME_LENGTH))
-		 return FALSE;
-	return TRUE;
+	if (!xdr_bytes(xdrs, (char **)&objp->chunk_val, (u_int *)&objp->chunk_len, CHUNK_LENGTH))
+		return (FALSE);
+	return (TRUE);
 }
 
 bool_t
-xdr_chunk (XDR *xdrs, chunk *objp)
+xdr_servant_request(xdrs, objp)
+	XDR *xdrs;
+	servant_request *objp;
 {
-	register int32_t *buf;
 
-	 if (!xdr_bytes (xdrs, (char **)&objp->chunk_val, (u_int *) &objp->chunk_len, CHUNK_LENGTH))
-		 return FALSE;
-	return TRUE;
+	if (!xdr_chunk(xdrs, &objp->data))
+		return (FALSE);
+	return (TRUE);
 }
 
 bool_t
-xdr_get_request (XDR *xdrs, get_request *objp)
+xdr_servant_response(xdrs, objp)
+	XDR *xdrs;
+	servant_response *objp;
 {
-	register int32_t *buf;
 
-	 if (!xdr_filename (xdrs, &objp->path))
-		 return FALSE;
-	 if (!xdr_int (xdrs, &objp->start))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
-xdr_put_request (XDR *xdrs, put_request *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_filename (xdrs, &objp->path))
-		 return FALSE;
-	 if (!xdr_chunk (xdrs, &objp->data))
-		 return FALSE;
-	 if (!xdr_int (xdrs, &objp->bytes))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
-xdr__get_response (XDR *xdrs, _get_response *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_chunk (xdrs, &objp->data))
-		 return FALSE;
-	 if (!xdr_int (xdrs, &objp->bytes))
-		 return FALSE;
-	return TRUE;
-}
-
-bool_t
-xdr_get_response (XDR *xdrs, get_response *objp)
-{
-	register int32_t *buf;
-
-	 if (!xdr_int (xdrs, &objp->errno))
-		 return FALSE;
-	switch (objp->errno) {
-	case 0:
-		 if (!xdr__get_response (xdrs, &objp->get_response_u.chunk))
-			 return FALSE;
-		break;
-	default:
-		break;
-	}
-	return TRUE;
+	if (!xdr_chunk(xdrs, &objp->data))
+		return (FALSE);
+	return (TRUE);
 }

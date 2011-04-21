@@ -1,0 +1,7 @@
+"SERVANT/1.0\nAction:(numeros e letras)\nParams:(palavras separados por virgula)\nContent:(qualquer coisa)"
+possible actions:
+    download, upload, login, delete, copy, move, mkdir
+    
+
+"SERVANT/1.0 STATUS(number)\nContent-length:(number)\nContent:(anything)\n"
+

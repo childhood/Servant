@@ -3,6 +3,7 @@
 #include <string.h>
 #include <regex.h>
 #include "servant.h"
+#include "servant_protocol_utils.h"
 
 #ifdef __APPLE__
     extern int errno;
@@ -10,70 +11,92 @@
     extern __thread int errno;
 #endif
 
-void download_file(char *host, char *filename) {
-    CLIENT *client;
+#define SERV_ERROR_FILE 0
+#define SERV_ERROR_UPLOAD 1
+#define SERV_ERROR_DOWNLOAD 2
+    
+
+int download_file(CLIENT *client, char *host, char* filename) {
+    
     int file_position;
-    //char *path;
-    get_response *result;
-    get_request request;
+    servant_response *response;
     FILE *file;
+    request_message_t data;
+    response_message_t* response_data;
+    
+    servant_request* request;
+    char str_start[20];
 
-    request.path = filename;
-    char *path = (char *) malloc(FILENAME_LENGTH*sizeof(char));
-    sprintf(path, "output/%s", filename);
-    request.start = 0;
-
-    client = clnt_create(host, SERVANT, SERVANTVERSION, "tcp");
-    if (client == NULL) {
-        clnt_pcreateerror(host);
-        exit(1);
-    }
-
-    file = fopen(path, "w");
     file_position = 0;
 
-    do {
-        request.start = file_position;
-        result = download_1(&request, client);
+    strcpy(data.version, "1");
+    strcpy(data.action, "DOWNLOAD"); 
+    data.params = (char**)malloc(sizeof(char*));
+    data.params[0] = (char*)malloc(sizeof(char)*50);
+    strcpy(data.params[0], "DEFAULT");
+    data.n_params = 1;
 
-        if (result == NULL) {
-            clnt_perror(client, host);
-            exit(1);
-        }
+    char *path = (char *) malloc(200*sizeof(char));
+    sprintf(path, "output/%s", filename);
 
-        if (result->errno != 0) {
-            errno = result->errno;
-            perror("Could not retrieve file...\n");
-            exit(1);
-        }
+    file = fopen(path, "w");
 
-        fwrite(result->get_response_u.chunk.data.chunk_val, 1, result->get_response_u.chunk.data.chunk_len, file);
-        file_position += result->get_response_u.chunk.bytes;
+    //do {
+        data.content = (char*)malloc(sizeof(char)*200);
+        strcpy(data.content, "Filename:\"");
+        strcat(data.content, filename);
+        strcat(data.content, "\"Start:");
+        sprintf(str_start, "%d", file_position);
+        strcat(data.content, str_start);
+        data.content_length = strlen(data.content);
+
+        request = assemble_request(&data);
+
+        printf("%s\n", request->data.chunk_val);
         
-    } while(result->get_response_u.chunk.bytes == CHUNK_LENGTH);
+        
+        response = send_request_1(request, client);
+        
+        if (response== NULL) {
+            clnt_perror(client, host);
+            //exit(1);
+            return SERV_ERROR_DOWNLOAD;
+        }
+
+        //if (result->errno != 0) {
+        //    errno = result->errno;
+            //perror("Could not retrieve file...\n");
+            //exit(1);
+        //    return SERV_ERROR_DOWNLOAD;
+        //}*/
+
+        response_data = disassemble_response(response);
+    
+        printf("%s\n%s\n%d\n%s\n", response_data->version, response_data->status, response_data->content_length, response_data->content);
+
+        //fwrite(response_data->content, 1, response_data->content_length, file);
+        //file_position += response_data->content_length;
+        
+    //} while(response_data->content_length == CHUNK_LENGTH);
 
     fclose(file);
 }
 
-void upload_file(char *host, char *filename) {
-    CLIENT *client;
+/*
+int upload_file(CLIENT* client, char *host, char *filename) {
     char data[1100];
     int read_bytes;
-    int *result;
+    int* result;
+    
     put_request request;
-    FILE *file;
-    char *path = (char *) malloc(FILENAME_LENGTH*sizeof(char));
-
-    client = clnt_create(host, SERVANT, SERVANTVERSION, "tcp");
-    if (client == NULL) {
-        clnt_pcreateerror(host);
-        exit(1);
-    }
+    FILE* file;
+    char* path;
+    path = (char*)malloc(FILENAME_LENGTH*sizeof(char));    
     sprintf(path, "output/%s", filename);
     file = fopen(path, "r");
 
     if (file == NULL) {
-        return;
+        return SERV_ERROR_FILE;
     }
     request.path = filename;
 
@@ -87,21 +110,22 @@ void upload_file(char *host, char *filename) {
         result = upload_1(&request, client);
 
         if (result == NULL) {
-            clnt_perror(client, host);
-            exit(1);
+            //clnt_perror(client, host);
+            return SERV_ERROR_UPLOAD;
         }
         
         if (*result != 0) {
             errno = *result;
-            perror(filename);
-            exit(1);
+            //perror(filename);
+            return SERV_ERROR_UPLOAD;
         }
     } while(read_bytes == CHUNK_LENGTH);
 
+    free(path);
     fclose(file);
 }
-
-char **parse_command(char* command) {
+*/
+char** parse_command(char* command) {
     regex_t regex_command;
     regmatch_t pm[10];
     char **parsed_data;
@@ -123,29 +147,35 @@ char **parse_command(char* command) {
 }
 
 
-void execute_on_server(char* host, char** command) {
+void execute_on_server(CLIENT* client, char* host, char** command) {
     if(!strcmp(command[0], "get")) {
-        download_file(host, command[1]);
+        download_file(client, host, command[1]);
     } else if(!strcmp(command[0], "put")) {
-        upload_file(host, command[1]);
+        //upload_file(client, host, command[1]);
     }
 }
 
-
-int main (int argc, char *argv[])
+int main (int argc, char* argv[])
 {
-    char *host;
+    char* host;
     int exit_flag = 0;
-    char **parsed_command, command[100];
+    char** parsed_command, command[100];
+    CLIENT* client;
+        
 
+    //Checking number of arguments
     if (argc < 2) {
 	printf ("usage: %s server_host\n", argv[0]);
         exit (1);
     }
-    host = argv[1];
 
-    //printf(">> ");
-    //scanf("%s", filename);
+    //Creating client
+    host = argv[1];
+    client = clnt_create(host, SERVANT, SERVANTVERSION, "tcp");
+    if (client == NULL) {
+        clnt_pcreateerror(host);
+        exit(1);
+    }
 
     do {
         printf(">> ");
@@ -154,11 +184,9 @@ int main (int argc, char *argv[])
 
         if (strcmp(command, "exit")) {
             parsed_command = parse_command(command);
-            
             if (parsed_command != NULL) {
-                //executar comando (execute_on_client(parsed_command));          
-                execute_on_server(host, parsed_command);
-        
+                //execute_on_client(parsed_command);
+                execute_on_server(client, host, parsed_command);
                 free(parsed_command[0]);
                 free(parsed_command[1]);        
                 free(parsed_command);
@@ -167,6 +195,6 @@ int main (int argc, char *argv[])
             exit_flag = 1;
         }        
     } while(!exit_flag);
-	
+
     return 0;
 }

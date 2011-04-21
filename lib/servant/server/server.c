@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "servant.h"
+#include "servant_protocol_utils.h"
 
 #ifdef __APPLE__
     extern int errno;
@@ -7,7 +8,30 @@
     extern __thread int errno;
 #endif
 
-get_response *download_1_svc(get_request *request, struct svc_req *rqstp)
+servant_response *send_request_1_svc(servant_request* request, struct svc_req *rqstp) {
+    servant_response* response = NULL;
+    request_message_t* request_data;
+    response_message_t response_data;
+    
+    request_data = disassemble_request(request);
+    
+    if (request_data != NULL) { 
+        strcpy(response_data.status, "OK");        
+    } else {
+        strcpy(response_data.status, "FAIL");        
+    }
+    strcpy(response_data.version, "1");
+    response_data.content_length = strlen(request->data.chunk_val);
+    response_data.content = (char*)malloc(sizeof(char)*1024);
+    strcpy(response_data.content, request->data.chunk_val);
+    
+    response = assemble_response(&response_data);
+
+    return response;
+}
+
+
+/*get_response *download_1_svc(get_request *request, struct svc_req *rqstp)
 {
     FILE *file;
     static char data[1024];
@@ -49,4 +73,4 @@ int *upload_1_svc(put_request *request, struct svc_req *rqstp)
 
     result = 0;
     return &result;
-}
+}*/
