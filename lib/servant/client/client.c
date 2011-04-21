@@ -80,6 +80,8 @@ int download_file(CLIENT *client, char *host, char* filename) {
     //} while(response_data->content_length == CHUNK_LENGTH);
 
     fclose(file);
+
+	return 0;
 }
 
 /*

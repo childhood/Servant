@@ -3,20 +3,23 @@
  * It was generated using rpcgen.
  */
 
+#include <memory.h> /* for memset */
 #include "servant.h"
 
 /* Default timeout can be changed using clnt_control() */
 static struct timeval TIMEOUT = { 25, 0 };
 
 servant_response *
-send_request_1(argp, clnt)
-	servant_request *argp;
-	CLIENT *clnt;
+send_request_1(servant_request *argp, CLIENT *clnt)
 {
 	static servant_response clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
-	if (clnt_call(clnt, send_request, xdr_servant_request, argp, xdr_servant_response, &clnt_res, TIMEOUT) != RPC_SUCCESS)
+	if (clnt_call (clnt, send_request,
+		(xdrproc_t) xdr_servant_request, (caddr_t) argp,
+		(xdrproc_t) xdr_servant_response, (caddr_t) &clnt_res,
+		TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);
+	}
 	return (&clnt_res);
 }

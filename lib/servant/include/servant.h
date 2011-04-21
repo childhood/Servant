@@ -6,9 +6,12 @@
 #ifndef _SERVANT_H_RPCGEN
 #define _SERVANT_H_RPCGEN
 
-#define RPCGEN_VERSION	199506
-
 #include <rpc/rpc.h>
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define CHUNK_LENGTH 1500
 
@@ -16,58 +19,49 @@ typedef struct {
 	u_int chunk_len;
 	char *chunk_val;
 } chunk;
-#ifdef __cplusplus
-extern "C" bool_t xdr_chunk(XDR *, chunk*);
-#elif __STDC__
-extern  bool_t xdr_chunk(XDR *, chunk*);
-#else /* Old Style C */
-bool_t xdr_chunk();
-#endif /* Old Style C */
-
 
 struct servant_request {
 	chunk data;
 };
 typedef struct servant_request servant_request;
-#ifdef __cplusplus
-extern "C" bool_t xdr_servant_request(XDR *, servant_request*);
-#elif __STDC__
-extern  bool_t xdr_servant_request(XDR *, servant_request*);
-#else /* Old Style C */
-bool_t xdr_servant_request();
-#endif /* Old Style C */
-
 
 struct servant_response {
 	chunk data;
 };
 typedef struct servant_response servant_response;
-#ifdef __cplusplus
-extern "C" bool_t xdr_servant_response(XDR *, servant_response*);
-#elif __STDC__
-extern  bool_t xdr_servant_response(XDR *, servant_response*);
-#else /* Old Style C */
-bool_t xdr_servant_response();
-#endif /* Old Style C */
 
+#define SERVANT 43
+#define SERVANTVERSION 1
 
-#define SERVANT ((rpc_uint)43)
-#define SERVANTVERSION ((rpc_uint)1)
-
-#ifdef __cplusplus
-#define send_request ((rpc_uint)1)
-extern "C" servant_response * send_request_1(servant_request *, CLIENT *);
-extern "C" servant_response * send_request_1_svc(servant_request *, struct svc_req *);
-
-#elif __STDC__
-#define send_request ((rpc_uint)1)
+#if defined(__STDC__) || defined(__cplusplus)
+#define send_request 1
 extern  servant_response * send_request_1(servant_request *, CLIENT *);
 extern  servant_response * send_request_1_svc(servant_request *, struct svc_req *);
+extern int servant_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
 
-#else /* Old Style C */
-#define send_request ((rpc_uint)1)
+#else /* K&R C */
+#define send_request 1
 extern  servant_response * send_request_1();
 extern  servant_response * send_request_1_svc();
-#endif /* Old Style C */
+extern int servant_1_freeresult ();
+#endif /* K&R C */
+
+/* the xdr functions */
+
+#if defined(__STDC__) || defined(__cplusplus)
+extern  bool_t xdr_chunk (XDR *, chunk*);
+extern  bool_t xdr_servant_request (XDR *, servant_request*);
+extern  bool_t xdr_servant_response (XDR *, servant_response*);
+
+#else /* K&R C */
+extern bool_t xdr_chunk ();
+extern bool_t xdr_servant_request ();
+extern bool_t xdr_servant_response ();
+
+#endif /* K&R C */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !_SERVANT_H_RPCGEN */
