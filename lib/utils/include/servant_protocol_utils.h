@@ -31,4 +31,7 @@ servant_response* assemble_response(response_message_t* message);
 
 response_message_t* disassemble_response(servant_response* request);
 
+char* get_command_from_action(char* action);
+
+char* get_arg_from_action(char* action);
 #endif
