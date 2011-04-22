@@ -1,3 +1,5 @@
+.PHONY: test
+
 build: clean include xdr server client
 
 include:
@@ -5,6 +7,7 @@ include:
 	gcc -Wall -Ilib/utils/include -c lib/utils/file_utils.c -o bin/file_utils.o
 	gcc -Wall -c lib/servant/accountmanager/accountmanager.c -o bin/accountmanager.o
 	gcc -Wall -Ilib/utils/include -Ilib/servant/include -c lib/utils/servant_protocol_utils.c -o bin/servant_protocol_utils.o
+	gcc -Wall -Ilib/utils/include -c lib/servant/accountmanager/user.c -o bin/user.o
 
 xdr:
 	gcc -Wall -Ilib/servant/include -c lib/servant/servant_xdr.c -o bin/servant_xdr.o
@@ -19,3 +22,7 @@ client:
 clean:
 	find -name "*~" | xargs rm -rf
 	rm -f bin/*
+
+test:
+	gcc -Ilib/servant/accountmanager -Ilib/utils/include test/user_test.c bin/user.o -o bin/user_test
+	./bin/user_test
