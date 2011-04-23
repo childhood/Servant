@@ -12,7 +12,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include "file_utils.h"
 #include "md5.h"
 #include "accountmanager.h"
 

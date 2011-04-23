@@ -1,4 +1,4 @@
-#define TRUE 1
-#define FALSE 0
+#define SERVANT_TRUE 1
+#define SERVANT_FALSE 0
 
-typedef unsigned int bool_t;
+typedef unsigned int servant_bool_t;

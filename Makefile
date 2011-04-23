@@ -4,16 +4,17 @@ build: clean include xdr server client
 
 include:
 	gcc -Wall -Ilib/utils/include -c lib/utils/md5.c -o bin/md5.o
+	gcc -Wall -Ilib/utils/include -c lib/utils/string_utils.c -o bin/string_utils.o
 	gcc -Wall -Ilib/utils/include -c lib/utils/file_utils.c -o bin/file_utils.o
-	gcc -Wall -c lib/servant/accountmanager/accountmanager.c -o bin/accountmanager.o
 	gcc -Wall -Ilib/utils/include -Ilib/servant/include -c lib/utils/servant_protocol_utils.c -o bin/servant_protocol_utils.o
-	gcc -Wall -Ilib/utils/include -c lib/servant/accountmanager/user.c -o bin/user.o
+	gcc -Wall -Ilib/utils/include -Ilib/servant/accountmanager/include -c lib/servant/accountmanager/user.c -o bin/user.o
+	gcc -Wall -Ilib/servant/accountmanager/include -Ilib/utils/include -c lib/servant/accountmanager/accountmanager.c bin/user.o -o bin/accountmanager.o
 
 xdr:
 	gcc -Wall -Ilib/servant/include -c lib/servant/servant_xdr.c -o bin/servant_xdr.o
 
 server:
-	gcc -Wall -Ilib/servant/include -Ilib/utils/include -Ilib/servant/accountmanager \
+	gcc -Wall -Ilib/servant/include -Ilib/utils/include -Ilib/servant/accountmanager/include \
 		-o bin/servantd lib/servant/server/server.c lib/servant/server/servant_svc.c bin/*.o
 
 client:
@@ -24,5 +25,5 @@ clean:
 	rm -f bin/*
 
 test:
-	gcc -Ilib/servant/accountmanager -Ilib/utils/include test/user_test.c bin/user.o -o bin/user_test
+	gcc -Ilib/servant/accountmanager/include -Ilib/utils/include test/user_test.c bin/file_utils.o bin/accountmanager.o bin/string_utils.o  bin/user.o -o bin/user_test
 	./bin/user_test

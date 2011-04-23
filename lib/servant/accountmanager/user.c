@@ -3,11 +3,12 @@
 void initialize(user_list** list, unsigned char behavior) { 
     *list = (user_list*) malloc(sizeof(user_list));
 	(*list)->behavior = behavior;
+	(*list)->dirty = SERVANT_FALSE;
 	(*list)->size = 0;
 }
 
-void set_user_at(unsigned int index, user_list* list, servant_user user) { 
-    list->users[index] = user;
+void set_user_at(unsigned int index, user_list* list, servant_user* user) { 
+    list->users[index] = *user;
 }
 
 void shift(user_list* list, unsigned int index, unsigned char direction) { 
@@ -28,32 +29,23 @@ void shift(user_list* list, unsigned int index, unsigned char direction) {
 	}
 }
 
-void append(user_list* list, servant_user new_user) { 
+void append(user_list* list, servant_user* new_user) { 
     set_user_at(list->size++, list, new_user);
 }
 
-void print_list(user_list* list) { 
-	int i;
-
-	for (i = 0; i <= list->size; i++) {
-		printf("%s ", list->users[i].username);
-	}
-	printf("\n");
-}
-
-void insert_in_order(user_list* list, servant_user new_user) { 
+void insert_in_order(user_list* list, servant_user* new_user) { 
     unsigned int i;
 
-	for (i = 0; i < list->size && strcmp((list->users[i]).username, new_user.username) < 0; i++);
+	for (i = 0; i < list->size && strcmp((list->users[i]).username, new_user->username) < 0; i++);
 
 	shift(list, i, RIGHT);
 	set_user_at(i, list, new_user);
 	list->size++;
 }
 
-bool_t add(user_list* list, servant_user new_user) { 
+servant_bool_t add(user_list* list, servant_user* new_user) { 
     if (list->size >= MAX_SERVANT_USERS) {
-		return FALSE;
+		return SERVANT_FALSE;
 	}
 
 	if (list->behavior == ORDERED_LIST) {
@@ -62,7 +54,9 @@ bool_t add(user_list* list, servant_user new_user) {
 		append(list, new_user);
 	}
 
-	return TRUE;
+	list->dirty = SERVANT_TRUE;
+
+	return SERVANT_TRUE;
 }
 
 int sequential_search(user_list* list, char* username) { 
@@ -105,33 +99,35 @@ int search(user_list* list, char* username) {
 
 }
 
-bool_t remove_by_username(user_list* list, char* username) { 
+servant_bool_t remove_by_username(user_list* list, char* username) { 
     int index;
 
     index = search(list, username);	
 
 	if (index == USER_NOT_FOUND) {
-		return FALSE;
+		return SERVANT_FALSE;
 	}
 
 	shift(list, index, LEFT);
 	list->size--;
+
+	list->dirty = SERVANT_TRUE;
 	
-	return TRUE;
+	return SERVANT_TRUE;
 }
 
-bool_t remove_user(user_list* list, servant_user user) { 
-    return remove_by_username(list, user.username);
+servant_bool_t remove_user(user_list* list, servant_user* user) { 
+    return remove_by_username(list, user->username);
 }
 
-bool_t has_user(user_list* list, char* username) { 
+servant_bool_t has_user(user_list* list, char* username) { 
     int index;
 
 	index = search(list, username);
 
 	if (index == USER_NOT_FOUND) {
-		return FALSE;
+		return SERVANT_FALSE;
 	}
 
-	return TRUE;
+	return SERVANT_TRUE;
 }
