@@ -8,10 +8,12 @@
 
 #define PASSWORD_MAXLEN 256
 
+#define SERVANT_ACCOUNTS_FILE "data/accounts.servant"
+
 void read_password(char* output);
 
 int new_account(char* username, char* password);
 
-void parse_accounts_file(user_list** list, unsigned char behavior, char* accounts_file_name);
+void parse_accounts_file(user_list** list, unsigned char behavior);
 
-void update_accounts_file(user_list* list, char* accounts_file_name);
+void update_accounts_file(user_list* list);

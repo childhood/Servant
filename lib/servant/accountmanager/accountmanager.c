@@ -22,7 +22,7 @@ void read_password(char* output) {
 int new_account(char* username, char* password) { 
 	FILE *accounts;
 
-	if ((accounts = fopen("data/accounts.servant", "a")) == NULL) {
+	if ((accounts = fopen(SERVANT_ACCOUNTS_FILE, "a")) == NULL) {
 		perror("Could not open accounts file.\n");
 		exit(1);
 	}
@@ -36,8 +36,8 @@ int new_account(char* username, char* password) {
 	return 1;
 }
 
-void parse_accounts_file(user_list** list, unsigned char behavior, char* accounts_file_name) { 
-    FILE* accounts_file = fopen(accounts_file_name, "r");
+void parse_accounts_file(user_list** list, unsigned char behavior) { 
+    FILE* accounts_file = fopen(SERVANT_ACCOUNTS_FILE, "r");
 	servant_user* new_user;
 	string_list user;
 	char* line;
@@ -58,13 +58,13 @@ void parse_accounts_file(user_list** list, unsigned char behavior, char* account
 	fclose(accounts_file);
 }
 
-void update_accounts_file(user_list* list, char* accounts_file_name) { 
+void update_accounts_file(user_list* list) { 
     if (list->dirty) {
-		if (file_exists(accounts_file_name)) {
-			remove(accounts_file_name);
+		if (file_exists(SERVANT_ACCOUNTS_FILE)) {
+			remove(SERVANT_ACCOUNTS_FILE);
 		}
 
-		FILE* accounts_file = fopen(accounts_file_name, "w");
+		FILE* accounts_file = fopen(SERVANT_ACCOUNTS_FILE, "w");
 		char line[64];
 		int i;
 

@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include "accountmanager.h"
 
-#define TEST_FILE "test/user_test"
-
 void print_if_has_user(user_list* list, servant_user user) { 
 	if (has_user(list, user.username)) {
 		printf("User %s is registered.\n");
@@ -30,7 +28,7 @@ void print_users(user_list* list) {
 
 int main(int argc, char* argv[]) { 
 	user_list* servant_users;
-	FILE* test_file = fopen(TEST_FILE, "w");
+	FILE* test_file = fopen(SERVANT_ACCOUNTS_FILE, "w");
 
 	servant_user* u1 = (servant_user*) malloc(sizeof(servant_user));
 	servant_user* u2 = (servant_user*) malloc(sizeof(servant_user));
@@ -50,7 +48,7 @@ int main(int argc, char* argv[]) {
 	fclose(test_file);
 
 	printf("Parsing test accounts file...\t");
-	parse_accounts_file(&servant_users, ORDERED_LIST, TEST_FILE);
+	parse_accounts_file(&servant_users, ORDERED_LIST);
 	printf("done.\n");
 
 	print_users(servant_users);
@@ -110,15 +108,15 @@ int main(int argc, char* argv[]) {
 	print_users(servant_users);
 
 	printf("\n\nUpdating accounts file...\t");
-	update_accounts_file(servant_users, TEST_FILE);
+	update_accounts_file(servant_users);
 	printf("done.\n");
 
 	free(servant_users); 
-	remove(TEST_FILE);
+	remove(SERVANT_ACCOUNTS_FILE);
 
 	printf("\n\nNow using UNORDERED_LIST behavior.\n");
 
-	test_file = fopen(TEST_FILE, "w");
+	test_file = fopen(SERVANT_ACCOUNTS_FILE, "w");
 
 	write_line(test_file, "user0:3d517fe6ebab7b8cfcf98db6259c8a59");
 	write_line(test_file, "user1:24c9e15e52afc47c225b757e7bee1f9d");
@@ -130,7 +128,7 @@ int main(int argc, char* argv[]) {
 	fclose(test_file);
 	
 	printf("Parsing test accounts file...\t");
-	parse_accounts_file(&servant_users, UNORDERED_LIST, TEST_FILE);
+	parse_accounts_file(&servant_users, UNORDERED_LIST);
 	printf("done.\n");
 	
 	printf("Building some users...\n");
@@ -188,11 +186,11 @@ int main(int argc, char* argv[]) {
 	print_users(servant_users); 
 
 	printf("\n\nUpdating accounts file...\t");
-	update_accounts_file(servant_users, TEST_FILE);
+	update_accounts_file(servant_users);
 	printf("done.\n");
 
 	free(servant_users); 
-	remove(TEST_FILE); 
+	remove(SERVANT_ACCOUNTS_FILE); 
 
 
 	printf("\n\nTests are done. No errors.\n");

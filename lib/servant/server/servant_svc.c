@@ -12,12 +12,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include "md5.h"
-#include "accountmanager.h"
+#include "server.h"
 
 #ifndef SIG_PF
 #define SIG_PF void(*)(int)
 #endif
+
+extern user_list* servant_users;
 
 static void
 servant_1(struct svc_req *rqstp, register SVCXPRT *transp)
@@ -89,28 +90,9 @@ main (int argc, char **argv)
 
 	printf("servantd starting...\n");
 
-	if (!file_exists("data/accounts.servant")) {
-		char password[256], confirm_password[256];
+    start_servant();
 
-		printf("\nLooks like it's the first time you are running servantd. Please, set a password for the root account:\n");
-
-		do {
-			printf("\nPassword: ");
-			read_password(password);
-			
-			printf("\nConfirm password: ");
-			read_password(confirm_password);
-		} while (strcmp(password, confirm_password));
-
-		if (new_account("root", MDString(password))) {
-			printf("\nDone!\n");
-		} else {
-			perror("Could not register root account.\n");
-			exit(1);
-		}
-	}
-
-	printf("\n\nReady.");
+	printf("\n\nReady. Type Ctrl-C to finish....");
 	fflush(stdout);
 
 	svc_run();

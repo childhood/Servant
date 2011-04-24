@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include "servant.h"
-#include "servant_protocol_utils.h"
+#include "server.h"
 
 #ifdef __APPLE__
     extern int errno;
 #else
     extern __thread int errno;
 #endif
+
+extern user_list* servant_users;
 
 servant_response *send_request_1_svc(servant_request* request, struct svc_req *rqstp) {
     servant_response* response = NULL;
@@ -28,6 +30,53 @@ servant_response *send_request_1_svc(servant_request* request, struct svc_req *r
     response = assemble_response(&response_data);
 
     return response;
+}
+
+void start_servant() { 
+	trap(SIGINT, quit);
+	trap(SIGQUIT, quit);
+	trap(SIGTERM, quit);
+
+    if (!file_exists(SERVANT_ACCOUNTS_FILE)) {
+		char password[32], confirm_password[32];
+
+		printf("\nLooks like it's the first time you are running servantd. Please, set a password for the root account:\n");
+		do {
+			printf("\nPassword: ");
+			read_password(password);
+
+			printf("\nConfirm password: ");
+			read_password(confirm_password);
+		} while (strcmp(password, confirm_password));
+
+		if (!new_account("root", MDString(password))) {
+			perror("Could not create root account. Quiting...\n");
+		}
+	}
+
+	parse_accounts_file(&servant_users, ORDERED_LIST);
+}
+
+void quit(int signal) { 
+	printf("\n\n");
+	switch(signal) {
+		case SIGINT:
+			printf("Got SIGINT, ");
+			break;
+
+		case SIGQUIT:
+			printf("Got SIGQUIT, ");
+			break;
+
+		case SIGTERM:
+			printf("Got SIGTERM, ");
+			break;
+	}
+
+	printf("finishing...\n");
+    update_accounts_file(servant_users);	
+	printf("Ok.\n");
+	exit(0);
 }
 
 
