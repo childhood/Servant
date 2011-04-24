@@ -37,7 +37,7 @@ changing the IP address above if you started the server in a different machine.
 Contributing
 ------------
 
-We are not accepting pull request by now. We have to finish the first release and hand in
+We are not accepting pull requests by now. We have to finish the first release and hand in
 to the teacher first, of course.
 
 In some weeks, pull requests will be gracefully considered.
