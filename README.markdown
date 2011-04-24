@@ -7,7 +7,7 @@ RPC related code is generated using rpcgen.
 Context
 -------
 
-Servant was initally developed as part of Distributed Systems course at University of São Paulo.
+Servant was initally developed as part of Distributed Systems course at University of Sao Paulo.
 
 Current state
 -------------
