@@ -19,14 +19,19 @@ Test it!
 --------
 
 You can help us testing Servant. Download the code, and just
+
 	$ make
+
 to generate the server and the client files.
 
 Start the server:
+
 	$ ./bin/servantd
 
 Start the client
+
 	$ ./bin/servant 127.0.0.1
+
 changing the IP address above if you started the server in a different machine.
 
 Contributing
