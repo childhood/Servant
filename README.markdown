@@ -42,6 +42,11 @@ to the teacher first, of course.
 
 In some weeks, pull requests will be gracefully considered.
 
+License
+-------
+
+Servant is licensed under the GPL (version 3) license. For more details, refer to the LICENSE file.
+
 Authors
 -------
 * [Renato Mascarenhas][1]
