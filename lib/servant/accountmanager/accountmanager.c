@@ -38,21 +38,21 @@ int new_account(char* username, char* password) {
 
 void parse_accounts_file(user_list** list, unsigned char behavior) { 
     FILE* accounts_file = fopen(SERVANT_ACCOUNTS_FILE, "r");
-	servant_user* new_user;
+	servant_user* new_user = NULL;
 	string_list user;
-	char* line;
+	char* line = NULL;
+
 
 	initialize(list, behavior);
 
 	while((line = read_line(accounts_file)) != NULL) {
 		user = tokenize(line, ":");
-		new_user = (servant_user*) malloc(sizeof(servant_user));
+        new_user = (servant_user*) malloc(sizeof(servant_user));
 		strncpy(new_user->username, user[0], sizeof(new_user->username) - 1); 
 		strncpy(new_user->password, user[1], sizeof(new_user->password) - 1); 
 		user[0][31] = '\0';
 		user[1][31] = '\0';
 		add(*list, new_user);
-		free(new_user);
 	} 
 
 	fclose(accounts_file);

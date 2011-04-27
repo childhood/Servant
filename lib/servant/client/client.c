@@ -20,7 +20,6 @@ int make_ping(CLIENT* client, char* host) {
     servant_request* request;
     servant_response *response;
     response_message_t* response_data;
-    printf("ddddddd"); fflush(stdout);
 
     data.content = (char*)malloc(sizeof(char)*3);
     strcpy(data.content, " ");
