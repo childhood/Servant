@@ -15,13 +15,55 @@
 #define SERV_ERROR_UPLOAD 1
 #define SERV_ERROR_DOWNLOAD 2
     
+int make_ping(CLIENT* client, char* host) {
+    request_message_t data;
+    servant_request* request;
+    servant_response *response;
+    response_message_t* response_data;
+    printf("ddddddd"); fflush(stdout);
 
-int download_file(CLIENT *client, char *host, char* filename) {
+    data.content = (char*)malloc(sizeof(char)*3);
+    strcpy(data.content, " ");
+    data.content_length = 1;
+    strcpy(data.version, "1");
+    data.params = (char**)malloc(sizeof(char*));
+    
+    data.params[0] = (char*)malloc(sizeof(char)*50);
+    strcpy(data.params[0], "DEFAULT");
+    data.n_params = 1;
+    
+    data.content = (char*)malloc(sizeof(char)*200);
+    strcpy(data.action, "PING");
+    request = assemble_request(&data);
+    
+    response = send_request_1(request, client);
+    
+    if (response== NULL) {
+        clnt_perror(client, host);
+        return SERV_ERROR_DOWNLOAD;
+    }
+    
+    //if (result->errno != 0) {
+    //    errno = result->errno;
+    //perror("Could not retrieve file...\n");
+    //exit(1);
+    //    return SERV_ERROR_DOWNLOAD;
+    //}*/
+    
+    response_data = disassemble_response(response);
+    
+    printf("-VERSION:%s\n-STATUS:%s\n-CONTENT-LENGTH:%d\n\n-CONTENT:%s\n\n\n", response_data->version, response_data->status, response_data->content_length, response_data->content);
+    
+    return 0;
+}
+
+int download_file(CLIENT* client, char* host, char* filename) {
     
     int file_position;
     servant_response *response;
     FILE *file;
     request_message_t data;
+    data.content = (char*)malloc(sizeof(char));
     response_message_t* response_data;
     
     servant_request* request;
@@ -29,9 +71,11 @@ int download_file(CLIENT *client, char *host, char* filename) {
 
     file_position = 0;
 
+    strcpy(data.content, " ");
+    data.content_length = 1;
     strcpy(data.version, "1");
-    strcpy(data.action, "DOWNLOAD"); 
     data.params = (char**)malloc(sizeof(char*));
+
     data.params[0] = (char*)malloc(sizeof(char)*50);
     strcpy(data.params[0], "DEFAULT");
     data.n_params = 1;
@@ -41,25 +85,19 @@ int download_file(CLIENT *client, char *host, char* filename) {
 
     file = fopen(path, "w");
 
-    //do {
+    do {
         data.content = (char*)malloc(sizeof(char)*200);
-        strcpy(data.content, "Filename:\"");
-        strcat(data.content, filename);
-        strcat(data.content, "\"Start:");
-        sprintf(str_start, "%d", file_position);
-        strcat(data.content, str_start);
-        data.content_length = strlen(data.content);
+        strcpy(data.action, "DOWNLOAD ");
+        sprintf(str_start, "%d ", file_position);
+        strcat(data.action, str_start);
+        strcat(data.action, filename);
 
         request = assemble_request(&data);
 
-        printf("%s\n", request->data.chunk_val);
-        
-        
         response = send_request_1(request, client);
-        
+
         if (response== NULL) {
             clnt_perror(client, host);
-            //exit(1);
             return SERV_ERROR_DOWNLOAD;
         }
 
@@ -71,21 +109,19 @@ int download_file(CLIENT *client, char *host, char* filename) {
         //}*/
 
         response_data = disassemble_response(response);
-    
-        printf("%s\n%s\n%d\n%s\n", response_data->version, response_data->status, response_data->content_length, response_data->content);
 
-        //fwrite(response_data->content, 1, response_data->content_length, file);
-        //file_position += response_data->content_length;
+
+        fwrite(response_data->content, 1, response_data->content_length, file);
+        file_position += response_data->content_length;
         
-    //} while(response_data->content_length == CHUNK_LENGTH);
+    } while(response_data->content_length == CHUNK_LENGTH);
 
     fclose(file);
 
 	return 0;
 }
 
-/*
-int upload_file(CLIENT* client, char *host, char *filename) {
+/*int upload_file(CLIENT* client, char *host, char *filename) {
     char data[1100];
     int read_bytes;
     int* result;
@@ -125,35 +161,36 @@ int upload_file(CLIENT* client, char *host, char *filename) {
 
     free(path);
     fclose(file);
-}
-*/
+}*/
+
 char** parse_command(char* command) {
     regex_t regex_command;
     regmatch_t pm[10];
     char **parsed_data;
-     
-    regcomp(&regex_command, "([a-z]+) ([^\n]*)?", REG_EXTENDED);
+    
+    regcomp(&regex_command, "([a-z]+)( ([^\n]*))?", REG_EXTENDED|REG_NEWLINE);
     if (!regexec(&regex_command, command, 10, pm, 0)) {
         parsed_data = (char**)malloc(sizeof(char*)*2);
         parsed_data[0] = (char*)malloc(sizeof(char)*20);
         parsed_data[1] = (char*)malloc(sizeof(char)*100);
 
         strncpy(parsed_data[0], command + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);
-        parsed_data[1][pm[1].rm_eo - pm[1].rm_so] = '\0';
-        strncpy(parsed_data[1], command + pm[2].rm_so, pm[2].rm_eo - pm[2].rm_so);
-        parsed_data[1][pm[2].rm_eo - pm[2].rm_so] = '\0';
+        parsed_data[0][pm[1].rm_eo - pm[1].rm_so] = '\0';
+        strncpy(parsed_data[1], command + pm[3].rm_so, pm[3].rm_eo - pm[3].rm_so);
+        parsed_data[1][pm[3].rm_eo - pm[3].rm_so] = '\0';
     } else {
         parsed_data = NULL;
     }
     return parsed_data;    
 }
 
-
 void execute_on_server(CLIENT* client, char* host, char** command) {
-    if(!strcmp(command[0], "get")) {
+    if(!strcmp(command[0], "download")) {
         download_file(client, host, command[1]);
-    } else if(!strcmp(command[0], "put")) {
+    } else if(!strcmp(command[0], "upload")) {
         //upload_file(client, host, command[1]);
+    } else if(!strcmp(command[0], "ping")) {
+        make_ping(client, host);
     }
 }
 
