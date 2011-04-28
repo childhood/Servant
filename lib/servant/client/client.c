@@ -22,9 +22,9 @@ int make_ping(CLIENT* client, char* host) {
     response_message_t* response_data;
 
     data.content = (char*)malloc(sizeof(char)*3);
-    strcpy(data.content, " ");
-    data.content_length = 1;
-    strcpy(data.version, "1");
+    strcpy(data.content, "");
+    data.content_length = 0;
+    strcpy(data.version, SERVANT_PROTOCOL_VERSION);
     data.params = (char**)malloc(sizeof(char*));
     
     data.params[0] = (char*)malloc(sizeof(char)*50);
@@ -37,10 +37,10 @@ int make_ping(CLIENT* client, char* host) {
     
     response = send_request_1(request, client);
     
-    if (response== NULL) {
-        clnt_perror(client, host);
-        return SERV_ERROR_DOWNLOAD;
-    }
+    //if (response== NULL) {
+    //    clnt_perror(client, host);
+    //    return SERV_ERROR_DOWNLOAD;
+    //}
     
     //if (result->errno != 0) {
     //    errno = result->errno;
@@ -51,7 +51,7 @@ int make_ping(CLIENT* client, char* host) {
     
     response_data = disassemble_response(response);
     
-    printf("-VERSION:%s\n-STATUS:%s\n-CONTENT-LENGTH:%d\n\n-CONTENT:%s\n\n\n", response_data->version, response_data->status, response_data->content_length, response_data->content);
+    printf("-VERSION: %s\n-STATUS: %s\n-CONTENT-LENGTH: %d\n-CONTENT: %s\n", response_data->version, response_data->status, response_data->content_length, response_data->content);
     
     return 0;
 }
@@ -95,20 +95,7 @@ int download_file(CLIENT* client, char* host, char* filename) {
 
         response = send_request_1(request, client);
 
-        if (response== NULL) {
-            clnt_perror(client, host);
-            return SERV_ERROR_DOWNLOAD;
-        }
-
-        //if (result->errno != 0) {
-        //    errno = result->errno;
-            //perror("Could not retrieve file...\n");
-            //exit(1);
-        //    return SERV_ERROR_DOWNLOAD;
-        //}*/
-
         response_data = disassemble_response(response);
-
 
         fwrite(response_data->content, 1, response_data->content_length, file);
         file_position += response_data->content_length;

@@ -8,6 +8,7 @@ include:
 	gcc -Wall -Ilib/utils/include -c lib/utils/file_utils.c -o bin/file_utils.o
 	gcc -Wall -Ilib/utils/include -c lib/utils/signal_handling.c -o bin/signal_handling.o
 	gcc -Wall -Ilib/utils/include -Ilib/servant/include -c lib/utils/servant_protocol_utils.c -o bin/servant_protocol_utils.o
+	gcc -Wall -Ilib/utils/include -Ilib/servant/include -c lib/utils/servant_protocol_actions.c -o bin/servant_protocol_actions.o	
 	gcc -Wall -Ilib/utils/include -Ilib/servant/accountmanager/include -c lib/servant/accountmanager/user.c -o bin/user.o
 	gcc -Wall -Ilib/servant/accountmanager/include -Ilib/utils/include -c lib/servant/accountmanager/accountmanager.c bin/user.o -o bin/accountmanager.o
 
