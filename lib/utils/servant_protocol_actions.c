@@ -61,7 +61,7 @@ void download(request_message_t* request, response_message_t** response) {
         if (file != NULL)  {
             (*response)->content = (char*)malloc(1024*sizeof(char));
             fseek(file, start, SEEK_SET);
-            (*response)->content_length = fread((*response)->content, 1, 1024, file);        
+            (*response)->content_length = fread((*response)->content, 1, 512, file);        
             fclose(file);
         } else {
             status_flag = STATUS_NO_FILE;
@@ -74,11 +74,10 @@ void download(request_message_t* request, response_message_t** response) {
     //free(arg);
 }
 
-void upload(request_message_t* request, response_message_t** response) {/* 
+void upload(request_message_t* request, response_message_t** response) { 
     // path and starting point of the file to be sent 
     char path[100];
     char option[2];
-    int start;
     
     // regex to extract download action args 
     regex_t arg_pattern;
@@ -99,8 +98,8 @@ void upload(request_message_t* request, response_message_t** response) {/*
     regcomp(&arg_pattern, "(A|N) ([^ ]+)", REG_EXTENDED | REG_NEWLINE);      
     arg = get_arg_from_action(request->action); 
     if (!regexec(&arg_pattern, arg, 3, pm, 0)) {
-        strncpy(str_start, arg + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);
-        str_start[pm[1].rm_eo - pm[1].rm_so] = '\0';
+        strncpy(option, arg + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);
+        option[pm[1].rm_eo - pm[1].rm_so] = '\0';
         
         strncpy(path, arg + pm[2].rm_so, pm[2].rm_eo - pm[2].rm_so);
         path[pm[2].rm_eo - pm[2].rm_so] = '\0';
@@ -110,16 +109,16 @@ void upload(request_message_t* request, response_message_t** response) {/*
     
     if (status_flag == STATUS_OK) {
         if (option[0] == 'N') {
-            file = fopen(request->path, "w");
-        } else if (option[0] = 'A') {
-            file = fopen(request->path, "a");
+            file = fopen(path, "w");
+        } else if (option[0] == 'A') {
+            file = fopen(path, "a");
         }
         if (file != NULL)  {
             fwrite(request->content, 1, request->content_length, file);
             fclose(file);          
             (*response)->content = (char*)malloc(2*sizeof(char));
             strcpy((*response)->content, "");
-            (*response)->content_length = 0
+            (*response)->content_length = 0;
         } else {
             status_flag = STATUS_NO_FILE;
         }
@@ -127,7 +126,7 @@ void upload(request_message_t* request, response_message_t** response) {/*
     
     set_status_message((*response), status_flag); 
     set_protocol_version(*response);
-*/}
+}
 
 void login(request_message_t* request, response_message_t** response) {
     // regex to extract download action args 
@@ -172,17 +171,15 @@ void login(request_message_t* request, response_message_t** response) {
     set_protocol_version(*response);
 }
                                                             
-void rm(request_message_t* request, response_message_t** response) {/*
+void rm(request_message_t* request, response_message_t** response) {
     // path and starting point of the file to be sent
     char path[100];
-    int start;
     
     // regex to extract download action args
     regex_t arg_pattern;
     regmatch_t pm[3];
     char* arg;
     
-    FILE *file;
     int status_flag = STATUS_OK;
     
     if (response == NULL) {
@@ -212,12 +209,11 @@ void rm(request_message_t* request, response_message_t** response) {/*
     
     set_status_message((*response), status_flag); 
     set_protocol_version(*response);
-*/}
+}
 
-void cp(request_message_t* request, response_message_t** response) {/*
+void cp(request_message_t* request, response_message_t** response) {
     // path and starting point of the file to be sent
     char path_origin[100], path_destiny[100];
-    int start;
     
     // regex to extract download action args
     regex_t arg_pattern;
@@ -255,14 +251,14 @@ void cp(request_message_t* request, response_message_t** response) {/*
     (*response)->content_length = 0;
     if (status_flag == STATUS_OK) {
         file_destiny = fopen(path_destiny, "w");
-        file_origin = fopen(path_destiny, "a");
+        file_origin = fopen(path_origin, "r");
         
         if (file_origin != NULL && file_destiny != NULL)  {
             content = (char*)malloc(1024*sizeof(char));
             do {
                 read_data = fread(content, 1, 1024, file_origin);
                 fwrite(content, 1, read_data, file_destiny);
-            } while (read_data != 0);
+            } while (read_data == 1024);
             fclose(file_destiny);          
             fclose(file_origin);            
             free(content);
@@ -273,12 +269,11 @@ void cp(request_message_t* request, response_message_t** response) {/*
     
     set_status_message((*response), status_flag); 
     set_protocol_version(*response);    
-*/}
+}
 
-void mv(request_message_t* request, response_message_t** response) {/*
+void mv(request_message_t* request, response_message_t** response) {
     // path and starting point of the file to be sent
     char path_origin[100], path_destiny[100];
-    int start;
     
     // regex to extract download action args
     regex_t arg_pattern;
@@ -316,16 +311,16 @@ void mv(request_message_t* request, response_message_t** response) {/*
     (*response)->content_length = 0;    
     if (status_flag == STATUS_OK) {
         file_destiny = fopen(path_destiny, "w");
-        file_origin = fopen(path_destiny, "a");
+        file_origin = fopen(path_origin, "r");
         
         if (file_origin != NULL && file_destiny != NULL)  {
             content = (char*)malloc(1024*sizeof(char));
             do {
                 read_data = fread(content, 1, 1024, file_origin);
                 fwrite(content, 1, read_data, file_destiny);
-            } while (read_data != 0);
-            fclose(file_destiny);          
-            fclose(file_origin); 
+            } while (read_data == 1024);
+            fclose(file_origin);
+            fclose(file_destiny);
             remove(path_origin);
             free(content);
         } else {
@@ -335,10 +330,10 @@ void mv(request_message_t* request, response_message_t** response) {/*
     
     set_status_message((*response), status_flag); 
     set_protocol_version(*response);  
-*/}
+}
 
 
-void makedir(request_message_t* request, response_message_t** response) {/*
+void makedir(request_message_t* request, response_message_t** response) {
     // path and starting point of the file to be sent 
     char path[100];
     
@@ -346,11 +341,7 @@ void makedir(request_message_t* request, response_message_t** response) {/*
     regex_t arg_pattern;
     regmatch_t pm[3];
     char* arg;
-    
-    int read_data;
-    char* content;
-    
-    FILE *file_origin, *file_destiny;
+        
     int status_flag = STATUS_OK;
     
     if (response == NULL) {
@@ -364,8 +355,8 @@ void makedir(request_message_t* request, response_message_t** response) {/*
     regcomp(&arg_pattern, "([^ ]+)", REG_EXTENDED | REG_NEWLINE);      
     arg = get_arg_from_action(request->action); 
     if (!regexec(&arg_pattern, arg, 3, pm, 0)) {
-        strncpy(path_origin, arg + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);
-        path_origin[pm[1].rm_eo - pm[1].rm_so] = '\0';
+        strncpy(path, arg + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);
+        path[pm[1].rm_eo - pm[1].rm_so] = '\0';
     } else {
         status_flag = STATUS_WRONG_ARGS;
     }
@@ -379,4 +370,4 @@ void makedir(request_message_t* request, response_message_t** response) {/*
     }
     set_status_message((*response), status_flag); 
     set_protocol_version(*response);   
-*/}
+}

@@ -14,13 +14,13 @@
 #define SERV_ERROR_FILE 0
 #define SERV_ERROR_UPLOAD 1
 #define SERV_ERROR_DOWNLOAD 2
-    
+
 int make_ping(CLIENT* client, char* host) {
     request_message_t data;
     servant_request* request;
     servant_response *response;
     response_message_t* response_data;
-
+    
     data.content = (char*)malloc(sizeof(char)*3);
     strcpy(data.content, "");
     data.content_length = 0;
@@ -36,18 +36,6 @@ int make_ping(CLIENT* client, char* host) {
     request = assemble_request(&data);
     
     response = send_request_1(request, client);
-    
-    //if (response== NULL) {
-    //    clnt_perror(client, host);
-    //    return SERV_ERROR_DOWNLOAD;
-    //}
-    
-    //if (result->errno != 0) {
-    //    errno = result->errno;
-    //perror("Could not retrieve file...\n");
-    //exit(1);
-    //    return SERV_ERROR_DOWNLOAD;
-    //}*/
     
     response_data = disassemble_response(response);
     
@@ -67,87 +55,229 @@ int download_file(CLIENT* client, char* host, char* filename) {
     
     servant_request* request;
     char str_start[20];
-
+    
     file_position = 0;
-
-    strcpy(data.content, " ");
-    data.content_length = 1;
+    
+    strcpy(data.content, "");
+    data.content_length = 0;
     strcpy(data.version, "1");
     data.params = (char**)malloc(sizeof(char*));
-
+    
     data.params[0] = (char*)malloc(sizeof(char)*50);
     strcpy(data.params[0], "DEFAULT");
     data.n_params = 1;
-
+    
     char *path = (char *) malloc(200*sizeof(char));
     sprintf(path, "output/%s", filename);
-
+    
     file = fopen(path, "w");
-
+    
     do {
         data.content = (char*)malloc(sizeof(char)*200);
         strcpy(data.action, "DOWNLOAD ");
+        
         sprintf(str_start, "%d ", file_position);
         strcat(data.action, str_start);
         strcat(data.action, filename);
-
         request = assemble_request(&data);
-
+        
         response = send_request_1(request, client);
-
+        
         response_data = disassemble_response(response);
-
+        
         fwrite(response_data->content, 1, response_data->content_length, file);
         file_position += response_data->content_length;
         
-    } while(response_data->content_length == CHUNK_LENGTH);
-
+    } while(response_data->content_length == 512);
+    
     fclose(file);
-
+    
 	return 0;
 }
 
-/*int upload_file(CLIENT* client, char *host, char *filename) {
-    char data[1100];
-    int read_bytes;
-    int* result;
+int upload_file(CLIENT* client, char* host, char* filename) {
+    servant_response *response;
+    FILE *file;
+    request_message_t data;
+    data.content = (char*)malloc(sizeof(char));
+    response_message_t* response_data;
     
-    put_request request;
-    FILE* file;
-    char* path;
-    path = (char*)malloc(FILENAME_LENGTH*sizeof(char));    
+    servant_request* request;
+    
+    strcpy(data.version, "1");
+    data.params = (char**)malloc(sizeof(char*));
+    
+    data.params[0] = (char*)malloc(sizeof(char)*50);
+    strcpy(data.params[0], "DEFAULT");
+    data.n_params = 1;
+    
+    char *path = (char *) malloc(200*sizeof(char));
     sprintf(path, "output/%s", filename);
+    
     file = fopen(path, "r");
-
-    if (file == NULL) {
-        return SERV_ERROR_FILE;
+    
+    data.content = (char*)malloc(sizeof(char)*1030);
+    data.content_length = fread(data.content, 1, 512, file);
+    strcpy(data.action, "UPLOAD ");
+    strcat(data.action, "N ");
+    strcat(data.action, filename);
+    
+    request = assemble_request(&data);
+    response = send_request_1(request, client);
+    response_data = disassemble_response(response);
+    
+    while(data.content_length == 512) {
+        
+        data.content_length = fread(data.content, 1, 512, file);
+        strcpy(data.action, "UPLOAD ");
+        strcat(data.action, "A ");
+        strcat(data.action, filename); 
+        
+        request = assemble_request(&data);
+        response = send_request_1(request, client);
+        response_data = disassemble_response(response);
     }
-    request.path = filename;
-
-    do {  
-        read_bytes = fread(data, 1, CHUNK_LENGTH, file);
-
-        request.bytes = read_bytes;
-        request.data.chunk_val = data;
-        request.data.chunk_len = read_bytes;        
-        
-        result = upload_1(&request, client);
-
-        if (result == NULL) {
-            //clnt_perror(client, host);
-            return SERV_ERROR_UPLOAD;
-        }
-        
-        if (*result != 0) {
-            errno = *result;
-            //perror(filename);
-            return SERV_ERROR_UPLOAD;
-        }
-    } while(read_bytes == CHUNK_LENGTH);
-
-    free(path);
+    
     fclose(file);
-}*/
+    
+	return 0;
+}
+
+int remove_file(CLIENT* client, char* host, char* filename) {
+    servant_response *response;
+    request_message_t data;
+    data.content = (char*)malloc(sizeof(char));
+    response_message_t* response_data;
+    
+    servant_request* request;
+    
+    strcpy(data.content, " ");
+    data.content_length = 1;
+    
+    strcpy(data.version, "1");
+    
+    data.params = (char**)malloc(sizeof(char*));
+    data.params[0] = (char*)malloc(sizeof(char)*50);
+    strcpy(data.params[0], "DEFAULT");
+    data.n_params = 1;
+    
+    strcpy(data.action, "REMOVE ");
+    strcat(data.action, filename);
+    
+    request = assemble_request(&data);
+    response = send_request_1(request, client);
+    response_data = disassemble_response(response);
+    
+    if (!strcmp(response_data->status, STATUS_MESSAGE_OK)) {
+        printf("File removed\n");
+    } else {
+        printf("No file\n");
+    }
+    
+    return 0;
+}
+
+int copy_file(CLIENT* client, char* host, char* filename) {
+    servant_response *response;
+    request_message_t data;
+    data.content = (char*)malloc(sizeof(char));
+    response_message_t* response_data;
+    
+    servant_request* request;
+    
+    strcpy(data.content, " ");
+    data.content_length = 1;
+    
+    strcpy(data.version, "1");
+    
+    data.params = (char**)malloc(sizeof(char*));
+    data.params[0] = (char*)malloc(sizeof(char)*50);
+    strcpy(data.params[0], "DEFAULT");
+    data.n_params = 1;
+    
+    strcpy(data.action, "COPY ");
+    strcat(data.action, filename);
+    
+    request = assemble_request(&data);
+    response = send_request_1(request, client);
+    response_data = disassemble_response(response);
+    
+    if (!strcmp(response_data->status, STATUS_MESSAGE_OK)) {
+        printf("File copied\n");
+    } else {
+        printf("No file copied\n");
+    }
+    
+    return 0;
+}
+
+int move_file(CLIENT* client, char* host, char* filename) {
+    servant_response *response;
+    request_message_t data;
+    data.content = (char*)malloc(sizeof(char));
+    response_message_t* response_data;
+    
+    servant_request* request;
+    
+    strcpy(data.content, " ");
+    data.content_length = 1;
+    
+    strcpy(data.version, "1");
+    
+    data.params = (char**)malloc(sizeof(char*));
+    data.params[0] = (char*)malloc(sizeof(char)*50);
+    strcpy(data.params[0], "DEFAULT");
+    data.n_params = 1;
+    
+    strcpy(data.action, "MOVE ");
+    strcat(data.action, filename);
+    
+    request = assemble_request(&data);
+    response = send_request_1(request, client);
+    response_data = disassemble_response(response);
+    
+    if (!strcmp(response_data->status, STATUS_MESSAGE_OK)) {
+        printf("File moved\n");
+    } else {
+        printf("No file moved\n");
+    }
+    
+    return 0;
+}
+
+int make_directory(CLIENT* client, char* host, char* filename) {
+    servant_response *response;
+    request_message_t data;
+    data.content = (char*)malloc(sizeof(char));
+    response_message_t* response_data;
+    
+    servant_request* request;
+    
+    strcpy(data.content, " ");
+    data.content_length = 1;
+    
+    strcpy(data.version, "1");
+    
+    data.params = (char**)malloc(sizeof(char*));
+    data.params[0] = (char*)malloc(sizeof(char)*50);
+    strcpy(data.params[0], "DEFAULT");
+    data.n_params = 1;
+    
+    strcpy(data.action, "MKDIR ");
+    strcat(data.action, filename);
+    
+    request = assemble_request(&data);
+    response = send_request_1(request, client);
+    response_data = disassemble_response(response);
+    
+    if (!strcmp(response_data->status, STATUS_MESSAGE_OK)) {
+        printf("Directory created\n");
+    } else {
+        printf("No directory created\n");
+    }
+    
+    return 0;
+}
 
 char** parse_command(char* command) {
     regex_t regex_command;
@@ -174,9 +304,17 @@ void execute_on_server(CLIENT* client, char* host, char** command) {
     if(!strcmp(command[0], "download")) {
         download_file(client, host, command[1]);
     } else if(!strcmp(command[0], "upload")) {
-        //upload_file(client, host, command[1]);
+        upload_file(client, host, command[1]);
     } else if(!strcmp(command[0], "ping")) {
         make_ping(client, host);
+    } else if(!strcmp(command[0], "remove")) {
+        remove_file(client, host, command[1]);
+    } else if(!strcmp(command[0], "copy")) {
+        copy_file(client, host, command[1]);
+    } else if(!strcmp(command[0], "move")) {
+        move_file(client, host, command[1]);
+    } else if(!strcmp(command[0], "mkdir")) {
+        make_directory(client, host, command[1]);
     }
 }
 
