@@ -10,7 +10,7 @@ include:
 	gcc -Wall -Ilib/utils/include -Ilib/servant/include -c lib/utils/servant_protocol_utils.c -o bin/servant_protocol_utils.o
 	gcc -Wall -Ilib/utils/include -Ilib/servant/include -c lib/utils/servant_protocol_actions.c -o bin/servant_protocol_actions.o	
 	gcc -Wall -Ilib/utils/include -Ilib/servant/accountmanager/include -c lib/servant/accountmanager/user.c -o bin/user.o
-	gcc -Wall -Ilib/servant/accountmanager/include -Ilib/utils/include -c lib/servant/accountmanager/accountmanager.c bin/user.o -o bin/accountmanager.o
+	gcc -Wall -Ilib/servant/accountmanager/include -Ilib/utils/include -c lib/servant/accountmanager/accountmanager.c -o bin/accountmanager.o
 
 xdr:
 	gcc -Wall -Ilib/servant/include -c lib/servant/servant_xdr.c -o bin/servant_xdr.o

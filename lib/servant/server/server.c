@@ -62,6 +62,7 @@ void start_servant() {
 
 		if (!new_account("root", MDString(password))) {
 			perror("Could not create root account. Quiting...\n");
+			exit(1);
 		}
 	}
 

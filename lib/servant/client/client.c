@@ -3,7 +3,7 @@
 #include <string.h>
 #include <regex.h>
 #include "servant.h"
-#include "servant_protocol_utils.h"
+#include "client.h"
 
 #ifdef __APPLE__
     extern int errno;
@@ -54,6 +54,17 @@ int make_ping(CLIENT* client, char* host) {
     printf("-VERSION: %s\n-STATUS: %s\n-CONTENT-LENGTH: %d\n-CONTENT: %s\n", response_data->version, response_data->status, response_data->content_length, response_data->content);
     
     return 0;
+}
+
+
+void print_usage_message() { 
+    printf("\
+			servant1.0 Copyright (C) 2011 Renato Mascarenhas and Rafael Regis do Prado\n
+			Usage: %s <server_address>\n
+			This program comes with ABSOLUTELY NO WARRANTY.\n
+			This is free software, and you are welcome to redistribute it\n
+			under certain conditions; refer to the GPLv3 for details.\n
+			");
 }
 
 int download_file(CLIENT* client, char* host, char* filename) {
@@ -149,6 +160,30 @@ int download_file(CLIENT* client, char* host, char* filename) {
     fclose(file);
 }*/
 
+servant_bool_t authenticate(CLIENT* client, char* host, char* username, char* password) { 
+    request_message_t data;
+	servant_request* request;
+	servant_response* response;
+	response_message_t* response_data;
+
+	data.content = (char*)malloc(sizeof(char)*3);
+    strcpy(data.content, "");
+    data.content_length = 0;
+    strcpy(data.version, SERVANT_PROTOCOL_VERSION);
+    data.params = (char**)malloc(sizeof(char*));
+    
+    data.params[0] = (char*)malloc(sizeof(char)*50);
+    strcpy(data.params[0], "DEFAULT");
+    data.n_params = 1;
+    
+    data.content = (char*)malloc(sizeof(char)*200);
+    strcpy(data.action, "LOGIN");
+    request = assemble_request(&data);
+    
+    response = send_request_1(request, client);
+
+}
+
 char** parse_command(char* command) {
     regex_t regex_command;
     regmatch_t pm[10];
@@ -183,14 +218,16 @@ void execute_on_server(CLIENT* client, char* host, char** command) {
 int main (int argc, char* argv[])
 {
     char* host;
+	char username[32], password[32];
     int exit_flag = 0;
     char** parsed_command, command[100];
     CLIENT* client;
+	servant_bool_t registered;
         
 
     //Checking number of arguments
     if (argc < 2) {
-	printf ("usage: %s server_host\n", argv[0]);
+	   	print_usage_message(); 
         exit (1);
     }
 
@@ -201,6 +238,13 @@ int main (int argc, char* argv[])
         clnt_pcreateerror(host);
         exit(1);
     }
+
+	printf("Username: ");
+	scanf("%s", username);
+	printf("Password :");
+	read_password(password);
+
+	registered = authenticate(client, host, username, password);
 
     do {
         printf(">> ");

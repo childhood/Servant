@@ -134,7 +134,7 @@ void login(request_message_t* request, response_message_t** response) {
     regex_t arg_pattern;
     regmatch_t pm[3];
     char* arg;
-    char user[50], pass[50];
+    char username[32], password[32];
     
     int status_flag = STATUS_OK;
     

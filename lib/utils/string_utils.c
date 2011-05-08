@@ -27,7 +27,7 @@ void build_string_list(string_list* list, unsigned int size, unsigned int max_le
 
 void insert(string_list list, char* string, unsigned int position) { 
     strncpy(list[position], string, 32);
-	list[sizeof(string) - 1] = '\0';
+	//list[sizeof(string) - 1] = '\0';
 }
 
 string_list tokenize(char* string, const char* delimiters) { 
