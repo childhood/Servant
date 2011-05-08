@@ -88,7 +88,7 @@ servant_response* assemble_response(response_message_t* data) {
         return NULL;
     }
     
-    message = (char*)malloc(sizeof(char)*CHUNK_LENGTH);
+    message = (char*)malloc(sizeof(char)*2000);
     
     sprintf(message, "SERVANT/%s|Status:%s|Content-length:%d|Content:%s", data->version, data->status, data->content_length, data->content);
     
@@ -143,6 +143,9 @@ char* get_command_from_action(char* action) {
     regmatch_t pm[3];
     
     if(action == NULL) {
+        
+        
+
         printf("[from get_command_from_action]: action was not allocated previously\n");
         return NULL;
     }

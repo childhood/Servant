@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <regex.h>
+#include <sys/stat.h>
 
 #include "servant_protocol_utils.h"
 #include "servant.h"

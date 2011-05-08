@@ -19,7 +19,7 @@
 
 typedef struct {
     char version[5];
-    char action[20];
+    char action[100];
     int n_params;    
     char** params;
     int content_length;
