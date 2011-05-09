@@ -120,6 +120,20 @@ servant_bool_t remove_user(user_list* list, servant_user* user) {
     return remove_by_username(list, user->username);
 }
 
+servant_bool_t registered(user_list* list, char* username, char* password) { 
+    int index;
+
+	index = search(list, username);
+
+	if (index == USER_NOT_FOUND) {
+		return SERVANT_FALSE;
+	} else if (!strcmp(list->users[index].password, password)) {
+		return SERVANT_TRUE;
+	}	
+
+	return SERVANT_FALSE;
+}
+
 servant_bool_t has_user(user_list* list, char* username) {
     int index;
 
@@ -131,4 +145,3 @@ servant_bool_t has_user(user_list* list, char* username) {
 
     return SERVANT_TRUE;
 }
-

@@ -281,14 +281,14 @@ servant_bool_t authenticate(CLIENT* client, char* host, char* username, char* pa
     data.n_params = 1;
     
     data.content = (char*)malloc(sizeof(char)*200);
-    strcpy(data.action, "LOGIN");
+    sprintf(data.action, "LOGIN username:%s password:%s", username, MDString(password));
     request = assemble_request(&data);
     
     response = send_request_1(request, client);
 
 	response_data = disassemble_response(response);
 
-	if (!strcmp(response_data->status, STATUS_MESSAGE_OK)) {
+	if (!strcmp(response_data->status, STATUS_MESSAGE_OK) && !strcmp(response_data->content, "OK")) {
 		return SERVANT_TRUE;
 	}
 

@@ -19,6 +19,7 @@ void read_password(char* output) {
 	tcsetattr(STDIN_FILENO, TCSANOW, &old_term);
 }
 
+#include "md5.h"
 int new_account(char* username, char* password) { 
 	FILE *accounts;
 

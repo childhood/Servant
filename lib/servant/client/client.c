@@ -12,12 +12,12 @@
 
 void print_usage_message() { 
     printf("\
-			servant1.0 Copyright (C) 2011 Renato Mascarenhas and Rafael Regis do Prado\n \
-			Usage: servant <server_address>\n \
-			This program comes with ABSOLUTELY NO WARRANTY.\n \
-			This is free software, and you are welcome to redistribute it\n \
-			under certain conditions; refer to the GPLv3 for details.\n \
-			");
+servant1.0 Copyright (C) 2011 Renato Mascarenhas and Rafael Regis do Prado\n\
+Usage: servant <server_address>\n\
+This program comes with ABSOLUTELY NO WARRANTY.\n\
+This is free software, and you are welcome to redistribute it\n\
+under certain conditions; refer to the GPLv3 for details.\n\
+");
 }
 
 char** parse_command(char* command) {
@@ -56,7 +56,9 @@ void execute_on_server(CLIENT* client, char* host, char** command) {
         move_file(client, host, command[1]);
     } else if(!strcmp(command[0], "mkdir")) {
         make_directory(client, host, command[1]);
-    }
+    } else {
+		printf("servant: %s: command not found.\n", command[0]);
+	}
 }
 
 int main (int argc, char* argv[])
@@ -84,29 +86,36 @@ int main (int argc, char* argv[])
     }
 
 	printf("Username: ");
-	scanf("%s", username);
-	printf("Password :");
+	scanf("%[^\n]s", username);
+	getchar();
+	printf("Password: ");
 	read_password(password);
 
 	registered = authenticate(client, host, username, password);
+	printf("\n");
 
-    do {
-        printf(">> ");
-        scanf("%[^\n]s", command);
-        getchar();
+    if (registered) {
+		
+		do {
+			printf(">> ");
+			scanf("%[^\n]s", command);
+			getchar();
 
-        if (strcmp(command, "exit")) {
-            parsed_command = parse_command(command);
-            if (parsed_command != NULL) {
-                execute_on_server(client, host, parsed_command);
-                free(parsed_command[0]);
-                free(parsed_command[1]);        
-                free(parsed_command);
-            }
-        } else {
-            exit_flag = 1;
-        }        
-    } while(!exit_flag);
+			if (strcmp(command, "exit") && strcmp(command, "quit")) {
+				parsed_command = parse_command(command);
+				if (parsed_command != NULL) {
+					execute_on_server(client, host, parsed_command);
+					free(parsed_command[0]);
+					free(parsed_command[1]);        
+					free(parsed_command);
+				}
+			} else {
+				exit_flag = 1;
+			}        
+		} while(!exit_flag);
+	} else {
+		printf("Access denied for user %s on server %s.\n", username, host);
+	}
 
     return 0;
 }

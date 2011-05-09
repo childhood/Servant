@@ -1,7 +1,7 @@
 #include "servant.h"
 #include "servant_protocol_utils.h"
 #include "accountmanager.h"
-//#include "boolean.h"
+#include "md5.h"
 
 #define SERV_ERROR_FILE 0
 #define SERV_ERROR_UPLOAD 1

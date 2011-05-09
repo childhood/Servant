@@ -1,5 +1,7 @@
 #include "server_actions.h"
 
+extern user_list* servant_users;
+
 void ping(request_message_t* request, response_message_t** response) {
     if (response == NULL) {
         return;
@@ -132,8 +134,8 @@ void login(request_message_t* request, response_message_t** response) {
     // regex to extract download action args 
     regex_t arg_pattern;
     regmatch_t pm[3];
-    char* arg;
-    char username[32], password[32];
+	char* arg;
+    char password[32], username[32];
     
     int status_flag = STATUS_OK;
     
@@ -144,27 +146,30 @@ void login(request_message_t* request, response_message_t** response) {
         free((*response));
     }
     (*response) = (response_message_t*)malloc(sizeof(response_message_t));
-    
+
     //possible regex
-    regcomp(&arg_pattern, "user:([a-z][a-z0-9]) pass:([^ ]+)", REG_EXTENDED | REG_NEWLINE);      
+	regcomp(&arg_pattern, "username:([^ ]+) password:([^ ]+)", REG_EXTENDED | REG_NEWLINE);      
     arg = get_arg_from_action(request->action); 
     if (!regexec(&arg_pattern, arg, 3, pm, 0)) {
-        strncpy(username, arg + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);
+		strncpy(username, arg + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);
         username[pm[1].rm_eo - pm[1].rm_so] = '\0';
         
         strncpy(password, arg + pm[2].rm_so, pm[2].rm_eo - pm[2].rm_so);
         password[pm[2].rm_eo - pm[2].rm_so] = '\0';
+
     } else {
         status_flag = STATUS_WRONG_ARGS;
     }
+    
+	if (status_flag == STATUS_OK) {
+         (*response)->content = (char*)malloc(32*sizeof(char));
+		 if (registered(servant_users, username, password)) {
+			strcpy((*response)->content, "OK");
+		 } else {
+			 strcpy((*response)->content, "ACCESS DENIED");
+		 }
 
-    if (status_flag == STATUS_OK) {
-        //your implementation here!
-        /* include this somewhere with or without content.
-         (*response)->content = (char*)malloc(2*sizeof(char));
-         strcpy((*response)->content, "");
-         (*response)->content_length = 0; 
-         */
+         (*response)->content_length = sizeof((*response)->content); 
     }
     
     set_status_message((*response), status_flag); 
@@ -190,7 +195,7 @@ void rm(request_message_t* request, response_message_t** response) {
     }
     (*response) = (response_message_t*)malloc(sizeof(response_message_t));
     
-    regcomp(&arg_pattern, "([^ ]+)", REG_EXTENDED | REG_NEWLINE);      
+    regcomp(&arg_pattern, "([a-z][a-z0-9]*)", REG_EXTENDED | REG_NEWLINE);      
     arg = get_arg_from_action(request->action); 
     if (!regexec(&arg_pattern, arg, 3, pm, 0)) {       
         strncpy(path, arg + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);

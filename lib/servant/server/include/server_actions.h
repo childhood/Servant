@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 
 #include "servant_protocol_utils.h"
+#include "accountmanager.h"
 #include "servant.h"
 
 void ping(request_message_t* request, response_message_t** response);

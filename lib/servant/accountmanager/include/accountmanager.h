@@ -10,6 +10,8 @@
 
 #define SERVANT_ACCOUNTS_FILE "data/accounts.servant"
 
+user_list* servant_users;
+
 void read_password(char* output);
 
 int new_account(char* username, char* password);

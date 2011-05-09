@@ -13,8 +13,8 @@
 #define MAX_SERVANT_USERS 500
 
 typedef struct _servant_user {
-    char username[32];
-	char password[32];
+    char username[33];
+	char password[33];
 } servant_user;
 
 typedef struct _user_list { 
@@ -31,5 +31,7 @@ servant_bool_t add(user_list* list, servant_user* new_user);
 servant_bool_t remove_user(user_list* list, servant_user* user);
 
 servant_bool_t remove_by_username(user_list* list, char* username);
+
+servant_bool_t registered(user_list* list, char* username, char* password);
 
 servant_bool_t has_user(user_list* list, char* username);
