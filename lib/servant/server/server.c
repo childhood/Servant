@@ -18,7 +18,7 @@ servant_response *send_request_1_svc(servant_request* request, struct svc_req *r
 
     //request handling
     command = get_command_from_action(request_data->action);
-
+    
     if (!strcmp(command, "DOWNLOAD")) {
         download(request_data, &response_data);
     } else if (!strcmp(command, "UPLOAD")) {
@@ -35,13 +35,17 @@ servant_response *send_request_1_svc(servant_request* request, struct svc_req *r
         mv(request_data, &response_data);
     } else if (!strcmp(command, "MKDIR")) {
         makedir(request_data, &response_data);
+    } else if (!strcmp(command, "LIST")) {
+        list(request_data, &response_data);
+    } else {
+        return NULL;
     }
     
     response = assemble_response(response_data);
     
-    free(response_data);
-    free(request_data);
-    free(command);
+    //free(response_data);
+    //free(request_data);
+    //free(command);
     
     return response;
 }

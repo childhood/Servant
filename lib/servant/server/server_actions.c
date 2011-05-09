@@ -376,3 +376,80 @@ void makedir(request_message_t* request, response_message_t** response) {
     set_status_message((*response), status_flag); 
     set_protocol_version(*response);   
 }
+
+char __list_of_files[10000];
+
+int generate_tree(const char *path, const struct stat *status, int type, struct FTW* description) {
+    int i; 
+    char *last_part;
+    
+    if (strcmp(path, ".")) {        
+        for(i = 0; i < description->level; i++) {
+            strcat(__list_of_files, "  |");
+        }
+        strcat(__list_of_files, "-");
+        last_part = strrchr(path, '/');
+        if(last_part != NULL) {
+            strcat(__list_of_files, last_part+1);
+        } else {
+            strcat(__list_of_files, path);
+        }
+        strcat(__list_of_files, "\n");
+    }
+    return 0;
+}
+
+
+void list(request_message_t* request, response_message_t** response) {
+    // path and starting point of the file to be sent 
+    char path[100];
+    char str_seq[2];
+    char sequence = 0;
+    
+    // regex to extract download action args 
+    regex_t arg_pattern;
+    regmatch_t pm[3];
+    char* arg;
+    
+    int status_flag = STATUS_OK;
+    
+    if (response == NULL) {
+        return;
+    }
+    if ((*response) != NULL) {
+        free((*response));
+    }
+    (*response) = (response_message_t*)malloc(sizeof(response_message_t));
+    
+    regcomp(&arg_pattern, "([0-9]+) ([^ ]+)", REG_EXTENDED | REG_NEWLINE);      
+    arg = get_arg_from_action(request->action); 
+    if (!regexec(&arg_pattern, arg, 3, pm, 0)) {
+        strncpy(str_seq, arg + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);
+        str_seq[pm[1].rm_eo - pm[1].rm_so] = '\0';
+        sequence = atoi(str_seq);
+        
+        strncpy(path, arg + pm[2].rm_so, pm[2].rm_eo - pm[2].rm_so);
+        path[pm[2].rm_eo - pm[2].rm_so] = '\0';
+    } else {
+        status_flag = STATUS_WRONG_ARGS;
+    }
+    
+    if (status_flag == STATUS_OK) {
+        strcpy(__list_of_files, "");
+        
+        nftw(path, generate_tree, 1, 0);
+        
+        (*response)->content = (char*)malloc(1000*sizeof(char));
+        
+        strncpy((*response)->content, __list_of_files + sequence*1000, 1000);
+        (*response)->content[1000] = '\0';
+
+        (*response)->content_length = strlen((*response)->content);
+    }
+    
+    set_status_message((*response), status_flag); 
+    set_protocol_version(*response);
+    
+    
+    printf("%d\n", (*response)->content_length);
+}

@@ -199,7 +199,7 @@ void set_status_message(response_message_t* response, int status) {
         } break;
         case STATUS_WRONG_ARGS: {
             strcpy(response->status, STATUS_MESSAGE_WRONG_ARGS); 
-        } break;      
+        } break;     
     }
 }
 

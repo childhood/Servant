@@ -264,6 +264,46 @@ int make_directory(CLIENT* client, char* host, char* dirname) {
     return 0;
 }
 
+int list_server_content(CLIENT* client, char* host, char* dirname) {
+    int i;
+    servant_response *response;
+    request_message_t data;
+    data.content = (char*)malloc(sizeof(char));
+    response_message_t* response_data;
+    
+    servant_request* request;
+    
+    strcpy(data.content, " ");
+    data.content_length = 1;
+    
+    strcpy(data.version, "1");
+    
+    data.params = (char**)malloc(sizeof(char*));
+    data.params[0] = (char*)malloc(sizeof(char)*50);
+    strcpy(data.params[0], "DEFAULT");
+    data.n_params = 1;
+    
+    i = 0;
+    do {
+        if (strcmp(dirname, "")) {
+            sprintf(data.action, "LIST %d %s", i, dirname);
+        } else {
+            sprintf(data.action, "LIST %d %s", i, ".");
+        }
+        
+        request = assemble_request(&data);
+        response = send_request_1(request, client);
+        response_data = disassemble_response(response);
+        
+        printf("%s", response_data->content);
+
+                
+        i++;
+    } while(response_data->content_length == 1000); 
+
+    return 0;
+}
+
 servant_bool_t authenticate(CLIENT* client, char* host, char* username, char* password) { 
     request_message_t data;
 	servant_request* request;
