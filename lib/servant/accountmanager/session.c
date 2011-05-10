@@ -1,11 +1,7 @@
 #include "session.h"
 
 void init_session(session_t** session, unsigned char behavior) {
-	if (*session != NULL) {
-		free(*session);
-	}
-
-	session = (session_t**) malloc(sizeof(session_t*));
+	*session = (session_t*) malloc(sizeof(session_t));
     (*session)->connections = (connection*) malloc(MAX_CONNECTED_USERS*sizeof(connection));
 	(*session)->behavior = behavior;
 	(*session)->size = 0;
@@ -86,8 +82,6 @@ servant_bool_t new_connection(session_t* session, connection c) {
     } else {
         append_connection(session, c);
     }
-
-	printf("Registered user %s with session key %s\n", c.user.username, c.session_key);
 
     return SERVANT_TRUE;
 }

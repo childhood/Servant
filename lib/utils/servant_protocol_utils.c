@@ -44,23 +44,9 @@ request_message_t* disassemble_request(servant_request* request) {
         return NULL;
     }
 
-	printf("will compile regex...\n"); fflush(stdout);
+    regcomp(&request_pattern, "^SERVANT/([0-9]+)[|]Action:(.+)[|]Params:([a-zA-Z0-9]*)[|]Content-length:([0-9]+)[|]Content:(.*)$", REG_EXTENDED);
     
-    int reg = regcomp(&request_pattern, "^SERVANT/([0-9]+)[|]Action:(.+)[|]Params:([a-zA-Z0-9]*)[|]Content-length:([0-9]+)[|]Content:(.*)$", REG_EXTENDED);
-
-	if (reg != 0) {
-		printf("done shit...\n");
-	} else {
-		printf("done okai...\n");
-	}
-
-	printf("chunk val..."); fflush(stdout); printf("%s\n", request->data.chunk_val);
-
-	int ret = regexec(&request_pattern, request->data.chunk_val, 10, pm, 0);
-    //int ret = 1;
-	printf("lets if!\n"); fflush(stdout);
-    
-    if (!ret) {
+    if (!regexec(&request_pattern, request->data.chunk_val, 10, pm, 0)) {
 		printf("request matched!\n");	fflush(stdout);
         message = (request_message_t*) malloc(sizeof(request_message_t));
 
@@ -213,7 +199,7 @@ void set_status_message(response_message_t* response, int status) {
         } break;
         case STATUS_WRONG_ARGS: {
             strcpy(response->status, STATUS_MESSAGE_WRONG_ARGS); 
-        } break;      
+        } break;     
     }
 }
 

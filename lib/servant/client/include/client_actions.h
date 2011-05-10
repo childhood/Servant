@@ -20,4 +20,6 @@ int move_file(CLIENT* client, char* host, char* filename);
 
 int make_directory(CLIENT* client, char* host, char* dirname);
 
+int list_server_content(CLIENT* client, char* host, char* dirname);
+
 servant_bool_t authenticate(CLIENT* client, char* host, char* username, char* password);

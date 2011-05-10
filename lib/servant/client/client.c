@@ -56,6 +56,8 @@ void execute_on_server(CLIENT* client, char* host, char** command) {
         move_file(client, host, command[1]);
     } else if(!strcmp(command[0], "mkdir")) {
         make_directory(client, host, command[1]);
+    } else if(!strcmp(command[0], "list")) {
+        list_server_content(client, host, command[1]);
     } else {
 		printf("servant: %s: command not found.\n", command[0]);
 	}

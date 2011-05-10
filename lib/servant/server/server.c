@@ -10,34 +10,15 @@ extern user_list* servant_users;
 extern session_t* session;
 
 servant_response *send_request_1_svc(servant_request* request, struct svc_req *rqstp) {
-	printf("comeceeeei..\n"); fflush(stdout);
     request_message_t* request_data = NULL;
     response_message_t* response_data = NULL;
     static servant_response* response;
     char* command = NULL;
 
-	printf("will disassemble...\n");	fflush(stdout);
-
-	if (request == NULL) {
-		printf("ferrou...\n");
-	} else {
-		printf("vamo la...\n");
-	}
-
     request_data = disassemble_request(request);
-
-	printf("will get commmand from action...\n"); fflush(stdout);
 
     //request handling
     command = get_command_from_action(request_data->action);
-
-	if (request_data == NULL) {
-		printf("ja fudeu desdaki...\n");
-		fflush(stdout);
-	} else {
-		printf("good...\n");
-		fflush(stdout);
-	}
 
     if (!strcmp(command, "DOWNLOAD")) {
         download(request_data, &response_data);
@@ -55,21 +36,18 @@ servant_response *send_request_1_svc(servant_request* request, struct svc_req *r
         mv(request_data, &response_data);
     } else if (!strcmp(command, "MKDIR")) {
         makedir(request_data, &response_data);
+    //} else if (!strcmp(command, "LIST")) {
+    //    list(request_data, &response_data);
+    } else {
+        return NULL;
     }
 
     response = assemble_response(response_data);
 
-	if (response == NULL) {
-		printf("nulloooo\n");
-	} else {
-		printf("nao nulo... :/\n");
-	}
-	fflush(stdout);
-
     free(response_data);
     free(request_data);
     free(command);
-
+    
     return response;
 }
 
