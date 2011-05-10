@@ -154,9 +154,9 @@ int remove_file(CLIENT* client, char* host, char* filename) {
     response_data = disassemble_response(response);
     
     if (!strcmp(response_data->status, STATUS_MESSAGE_OK)) {
-        printf("File removed\n");
+        printf("File `%s` was removed from server.\n", filename);
     } else {
-        printf("No file\n");
+        printf("rm: Cannot remove file `%s`: no such file or directory\n", filename);
     }
     
     return 0;

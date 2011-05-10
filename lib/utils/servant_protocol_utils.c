@@ -47,7 +47,6 @@ request_message_t* disassemble_request(servant_request* request) {
     regcomp(&request_pattern, "^SERVANT/([0-9]+)[|]Action:(.+)[|]Params:([a-zA-Z0-9]*)[|]Content-length:([0-9]+)[|]Content:(.*)$", REG_EXTENDED);
     
     if (!regexec(&request_pattern, request->data.chunk_val, 10, pm, 0)) {
-		printf("request matched!\n");	fflush(stdout);
         message = (request_message_t*) malloc(sizeof(request_message_t));
 
         strncpy(message->version, request->data.chunk_val + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);

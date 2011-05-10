@@ -36,8 +36,8 @@ servant_response *send_request_1_svc(servant_request* request, struct svc_req *r
         mv(request_data, &response_data);
     } else if (!strcmp(command, "MKDIR")) {
         makedir(request_data, &response_data);
-    //} else if (!strcmp(command, "LIST")) {
-    //    list(request_data, &response_data);
+    } else if (!strcmp(command, "LIST")) {
+        list(request_data, &response_data);
     } else {
         return NULL;
     }

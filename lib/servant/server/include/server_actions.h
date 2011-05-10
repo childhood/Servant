@@ -1,12 +1,14 @@
 #ifndef _SERVANT_PROTOCOL_ACTIONS_H_
 #define _SERVANT_PROTOCOL_ACTIONS_H_
 
+#define _XOPEN_SOURCE 500
+#include <ftw.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <regex.h>
 #include <sys/stat.h>
-#include <ftw.h>
 
 #include "servant_protocol_utils.h"
 #include "accountmanager.h"

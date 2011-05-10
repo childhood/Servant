@@ -382,7 +382,7 @@ void makedir(request_message_t* request, response_message_t** response) {
     set_protocol_version(*response);   
 }
 
-/*char __list_of_files[10000];
+char __list_of_files[10000];
 
 int generate_tree(const char *path, const struct stat *status, int type, struct FTW* description) {
     int i; 
@@ -402,10 +402,10 @@ int generate_tree(const char *path, const struct stat *status, int type, struct 
         strcat(__list_of_files, "\n");
     }
     return 0;
-}*/
+}
 
 
-/*void list(request_message_t* request, response_message_t** response) {
+void list(request_message_t* request, response_message_t** response) {
     // path and starting point of the file to be sent 
     char path[100];
     char str_seq[2];
@@ -457,4 +457,4 @@ int generate_tree(const char *path, const struct stat *status, int type, struct 
     
     
     printf("%d\n", (*response)->content_length);
-}*/
+}
