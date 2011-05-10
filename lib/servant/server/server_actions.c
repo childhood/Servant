@@ -1,6 +1,7 @@
 #include "server_actions.h"
 
 extern user_list* servant_users;
+extern session_t* session;
 
 void ping(request_message_t* request, response_message_t** response) {
     if (response == NULL) {
@@ -160,17 +161,22 @@ void login(request_message_t* request, response_message_t** response) {
     } else {
         status_flag = STATUS_WRONG_ARGS;
     }
+
+	printf("tudo okaiii \n");	fflush(stdout);
     
 	if (status_flag == STATUS_OK) {
          (*response)->content = (char*)malloc(32*sizeof(char));
 		 if (registered(servant_users, username, password)) {
+			//connection c;
+			//c.user = get_user(servant_users, username, password);
+			//new_connection(session, c);
 			strcpy((*response)->content, "OK");
 		 } else {
 			 strcpy((*response)->content, "ACCESS DENIED");
 		 }
 
          (*response)->content_length = sizeof((*response)->content); 
-    }
+    } 
     
     set_status_message((*response), status_flag); 
     set_protocol_version(*response);

@@ -43,11 +43,25 @@ request_message_t* disassemble_request(servant_request* request) {
         printf("[from disassemble_request]: servant request struct was not allocated previously\n");
         return NULL;
     }
+
+	printf("will compile regex...\n"); fflush(stdout);
     
-    regcomp(&request_pattern, "^SERVANT/([0-9]+)[|]Action:(.+)[|]Params:([a-zA-Z0-9]*)[|]Content-length:([0-9]+)[|]Content:(.*)$", REG_EXTENDED);
+    int reg = regcomp(&request_pattern, "^SERVANT/([0-9]+)[|]Action:(.+)[|]Params:([a-zA-Z0-9]*)[|]Content-length:([0-9]+)[|]Content:(.*)$", REG_EXTENDED);
+
+	if (reg != 0) {
+		printf("done shit...\n");
+	} else {
+		printf("done okai...\n");
+	}
+
+	printf("chunk val..."); fflush(stdout); printf("%s\n", request->data.chunk_val);
+
+	int ret = regexec(&request_pattern, request->data.chunk_val, 10, pm, 0);
+    //int ret = 1;
+	printf("lets if!\n"); fflush(stdout);
     
-    
-    if (!regexec(&request_pattern, request->data.chunk_val, 10, pm, 0)) {
+    if (!ret) {
+		printf("request matched!\n");	fflush(stdout);
         message = (request_message_t*) malloc(sizeof(request_message_t));
 
         strncpy(message->version, request->data.chunk_val + pm[1].rm_so, pm[1].rm_eo - pm[1].rm_so);
@@ -72,7 +86,7 @@ request_message_t* disassemble_request(servant_request* request) {
         strncpy(message->content, request->data.chunk_val + pm[5].rm_so, pm[5].rm_eo - pm[5].rm_so);
         message->content[pm[5].rm_eo - pm[5].rm_so] = '\0';   
     } else {
-        printf("[from disassemble_request]: malformed servant request\n");
+        printf("[from disassemble_request]: malformed servant request\n"); fflush(stdout);
         return NULL;
     }
     

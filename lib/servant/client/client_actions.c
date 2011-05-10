@@ -264,7 +264,8 @@ int make_directory(CLIENT* client, char* host, char* dirname) {
     return 0;
 }
 
-servant_bool_t authenticate(CLIENT* client, char* host, char* username, char* password) { 
+servant_bool_t authenticate(CLIENT* client, char* host, char* username, char* password) {
+   	printf("authenticating....\n");	
     request_message_t data;
 	servant_request* request;
 	servant_response* response;
@@ -283,10 +284,24 @@ servant_bool_t authenticate(CLIENT* client, char* host, char* username, char* pa
     data.content = (char*)malloc(sizeof(char)*200);
     sprintf(data.action, "LOGIN username:%s password:%s", username, MDString(password));
     request = assemble_request(&data);
+
+	printf("will send...\n");
     
     response = send_request_1(request, client);
 
+	printf("gotcha..\n");
+	if (response == NULL) {
+		printf(":(\n");
+	} else {
+		printf(":)\n");
+	}
+
+	fflush(stdout);
+
 	response_data = disassemble_response(response);
+
+	printf("...\n");
+	fflush(stdout);
 
 	if (!strcmp(response_data->status, STATUS_MESSAGE_OK) && !strcmp(response_data->content, "OK")) {
 		return SERVANT_TRUE;

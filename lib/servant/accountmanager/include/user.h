@@ -34,4 +34,6 @@ servant_bool_t remove_by_username(user_list* list, char* username);
 
 servant_bool_t registered(user_list* list, char* username, char* password);
 
+servant_user get_user(user_list* list, char* username, char* password);
+
 servant_bool_t has_user(user_list* list, char* username);

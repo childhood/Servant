@@ -4,9 +4,9 @@
 #include "signal_handling.h"
 #include "servant_protocol_utils.h"
 #include "server_actions.h"
-#include "md5.h"
 
 extern user_list* servant_users;
+extern session_t* session;
 
 void start_servant();
 
