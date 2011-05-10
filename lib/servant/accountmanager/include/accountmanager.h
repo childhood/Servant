@@ -3,7 +3,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "user.h"
+#include "session.h"
 #include "file_utils.h"
 
 #define PASSWORD_MAXLEN 256
@@ -11,6 +11,7 @@
 #define SERVANT_ACCOUNTS_FILE "data/accounts.servant"
 
 user_list* servant_users;
+session_t* session;
 
 void read_password(char* output);
 

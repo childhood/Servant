@@ -1,6 +1,7 @@
 #include "server_actions.h"
 
 extern user_list* servant_users;
+//extern session_t* session;
 
 void ping(request_message_t* request, response_message_t** response) {
     if (response == NULL) {
@@ -164,6 +165,9 @@ void login(request_message_t* request, response_message_t** response) {
 	if (status_flag == STATUS_OK) {
          (*response)->content = (char*)malloc(32*sizeof(char));
 		 if (registered(servant_users, username, password)) {
+			connection c;
+			c.user = get_user(servant_users, username, password);
+			new_connection(session, c);
 			strcpy((*response)->content, "OK");
 		 } else {
 			 strcpy((*response)->content, "ACCESS DENIED");
@@ -377,7 +381,7 @@ void makedir(request_message_t* request, response_message_t** response) {
     set_protocol_version(*response);   
 }
 
-char __list_of_files[10000];
+/*char __list_of_files[10000];
 
 int generate_tree(const char *path, const struct stat *status, int type, struct FTW* description) {
     int i; 
@@ -397,10 +401,10 @@ int generate_tree(const char *path, const struct stat *status, int type, struct 
         strcat(__list_of_files, "\n");
     }
     return 0;
-}
+}*/
 
 
-void list(request_message_t* request, response_message_t** response) {
+/*void list(request_message_t* request, response_message_t** response) {
     // path and starting point of the file to be sent 
     char path[100];
     char str_seq[2];
@@ -452,4 +456,4 @@ void list(request_message_t* request, response_message_t** response) {
     
     
     printf("%d\n", (*response)->content_length);
-}
+}*/

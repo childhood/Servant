@@ -10,6 +10,7 @@ include:
 	gcc -Wall -Ilib/utils/include -Ilib/servant/include -c lib/utils/servant_protocol_utils.c -o bin/servant_protocol_utils.o
 	gcc -Wall -Ilib/utils/include -Ilib/servant/accountmanager/include -c lib/servant/accountmanager/user.c -o bin/user.o
 	gcc -Wall -Ilib/servant/accountmanager/include -Ilib/utils/include -c lib/servant/accountmanager/accountmanager.c -o bin/accountmanager.o
+	gcc -Wall -Ilib/servant/accountmanager/include -Ilib/utils/include -c lib/servant/accountmanager/session.c -o bin/session.o
 
 xdr:
 	gcc -Wall -Ilib/servant/include -c lib/servant/servant_xdr.c -o bin/servant_xdr.o
@@ -17,11 +18,15 @@ xdr:
 server:
 	gcc -Wall -Ilib/utils/include/ -Ilib/servant/server/include -Ilib/servant/accountmanager/include -Ilib/servant/include -c -o bin/server_actions.o lib/servant/server/server_actions.c
 	gcc -Wall -Ilib/servant/include -Ilib/utils/include -Ilib/servant/server/include -Ilib/servant/accountmanager/include \
-		-o bin/servantd lib/servant/server/server.c lib/servant/server/servant_svc.c bin/*.o
+		-o bin/servantd lib/servant/server/server.c lib/servant/server/servant_svc.c bin/md5.o bin/string_utils.o bin/file_utils.o \
+		bin/signal_handling.o bin/servant_protocol_utils.o bin/user.o bin/accountmanager.o bin/servant_xdr.o bin/server_actions.o bin/session.o
 
 client:
-	gcc -Wall -Ilib/servant/client/include -Ilib/servant/include -Ilib/servant/accountmanager/include -Ilib/utils/include -c -o bin/client_actions.o lib/servant/client/client_actions.c 
-	gcc -Wall -Ilib/servant/include -Ilib/utils/include -Ilib/servant/client/include -Ilib/servant/accountmanager/include -o bin/servant lib/servant/client/client.c lib/servant/client/servant_clnt.c bin/*.o
+	gcc -Wall -Ilib/servant/client/include -Ilib/servant/include -Ilib/servant/accountmanager/include -Ilib/utils/include -c \
+		-o bin/client_actions.o lib/servant/client/client_actions.c 
+	gcc -Wall -Ilib/servant/include -Ilib/utils/include -Ilib/servant/client/include -Ilib/servant/accountmanager/include -o bin/servant lib/servant/client/client.c lib/servant/client/servant_clnt.c bin/md5.o bin/string_utils.o bin/file_utils.o bin/signal_handling.o bin/servant_protocol_utils.o \
+		bin/user.o bin/accountmanager.o bin/servant_xdr.o bin/client_actions.o
+
 
 clean:
 	@find -name "*~" | xargs rm -rf

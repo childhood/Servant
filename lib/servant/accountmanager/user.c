@@ -145,3 +145,11 @@ servant_bool_t has_user(user_list* list, char* username) {
 
     return SERVANT_TRUE;
 }
+
+servant_user get_user(user_list* list, char* username, char* password) { 
+    int index;
+
+	index = search(list, username);
+
+	return list->users[index];
+}

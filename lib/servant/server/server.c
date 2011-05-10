@@ -7,6 +7,7 @@
 #endif
 
 extern user_list* servant_users;
+extern session_t* session;
 
 servant_response *send_request_1_svc(servant_request* request, struct svc_req *rqstp) {
     request_message_t* request_data = NULL;
@@ -35,8 +36,8 @@ servant_response *send_request_1_svc(servant_request* request, struct svc_req *r
         mv(request_data, &response_data);
     } else if (!strcmp(command, "MKDIR")) {
         makedir(request_data, &response_data);
-    } else if (!strcmp(command, "LIST")) {
-        list(request_data, &response_data);
+    //} else if (!strcmp(command, "LIST")) {
+    //    list(request_data, &response_data);
     } else {
         return NULL;
     }
@@ -74,6 +75,7 @@ void start_servant() {
 	}
 
 	parse_accounts_file(&servant_users, ORDERED_LIST);
+	init_session(&session, ORDERED_LIST);
 }
 
 void quit(int signal) { 
